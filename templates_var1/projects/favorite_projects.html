@@ -23,6 +23,18 @@
         {% endfor %}
     </div>
 
+    {% if projects.has_other_pages %}
+    <div class="pagination">
+        {% if projects.has_previous %}
+        <a href="?page={{ projects.previous_page_number }}" class="page-link">← Предыдущая</a>
+        {% endif %}
+        <span class="page-current">Страница {{ projects.number }} из {{ projects.paginator.num_pages }}</span>
+        {% if projects.has_next %}
+        <a href="?page={{ projects.next_page_number }}" class="page-link">Следующая →</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
     {% include 'includes/project-fav-toggle.js' %}
 </div>
 
