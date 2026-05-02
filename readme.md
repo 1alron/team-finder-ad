@@ -98,7 +98,11 @@ docker compose down
 
 ```bash
 python manage.py migrate
+python manage.py createsuperuser
+python manage.py create_test_data
 python manage.py runserver
 ```
+
+Команда `create_test_data` создаёт 5 тестовых пользователей с проектами для демонстрации функционала.
 
 Теперь проект доступен по адресу [http://localhost:8000](http://localhost:8000). 
