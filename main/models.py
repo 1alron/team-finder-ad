@@ -1,5 +1,9 @@
 from django.conf import settings
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import (
+    AbstractBaseUser,
+    BaseUserManager,
+    PermissionsMixin,
+)
 from django.db import models
 from django.utils import timezone
 
@@ -33,7 +37,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
-    favorites = models.ManyToManyField("Project", blank=True, related_name="favorited_by")
+    favorites = models.ManyToManyField(
+        "Project", blank=True, related_name="favorited_by"
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["name", "surname"]
@@ -52,13 +58,21 @@ class Project(models.Model):
         (STATUS_CLOSED, "Закрыт"),
     ]
 
-    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="owned_projects")
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="owned_projects",
+    )
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     github_url = models.URLField(blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_OPEN)
+    status = models.CharField(
+        max_length=10, choices=STATUS_CHOICES, default=STATUS_OPEN
+    )
     created_at = models.DateTimeField(auto_now_add=True)
-    participants = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="participating_projects")
+    participants = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, blank=True, related_name="participating_projects"
+    )
 
     class Meta:
         ordering = ["-created_at"]

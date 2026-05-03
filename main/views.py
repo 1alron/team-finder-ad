@@ -1,5 +1,11 @@
 import json
-from django.contrib.auth import authenticate, get_user_model, login, logout, update_session_auth_hash
+from django.contrib.auth import (
+    authenticate,
+    get_user_model,
+    login,
+    logout,
+    update_session_auth_hash,
+)
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import PasswordChangeForm
 from django.core.paginator import Paginator
@@ -29,11 +35,16 @@ def favorite_projects(request):
     paginator = Paginator(projects, 12)
     page = request.GET.get("page")
     projects_page = paginator.get_page(page)
-    return render(request, "projects/favorite_projects.html", {"projects": projects_page})
+    return render(
+        request, "projects/favorite_projects.html", {"projects": projects_page}
+    )
 
 
 def project_detail(request, project_id):
-    project = get_object_or_404(Project.objects.select_related("owner").prefetch_related("participants"), pk=project_id)
+    project = get_object_or_404(
+        Project.objects.select_related("owner").prefetch_related("participants"),
+        pk=project_id,
+    )
     return render(request, "projects/project-details.html", {"project": project})
 
 
@@ -46,7 +57,9 @@ def project_create(request):
         project.save()
         project.participants.add(request.user)
         return redirect(f"/projects/{project.id}")
-    return render(request, "projects/create-project.html", {"form": form, "is_edit": False})
+    return render(
+        request, "projects/create-project.html", {"form": form, "is_edit": False}
+    )
 
 
 @login_required
@@ -58,7 +71,9 @@ def project_edit(request, project_id):
     if request.method == "POST" and form.is_valid():
         form.save()
         return redirect(f"/projects/{project.id}")
-    return render(request, "projects/create-project.html", {"form": form, "is_edit": True})
+    return render(
+        request, "projects/create-project.html", {"form": form, "is_edit": True}
+    )
 
 
 @login_required
@@ -104,16 +119,28 @@ def users_list(request):
     users = UserModel.objects.order_by("-date_joined")
     if request.user.is_authenticated and active_filter:
         filter_map = {
-            "owners-of-favorite-projects": UserModel.objects.filter(owned_projects__in=request.user.favorites.all()),
-            "owners-of-participating-projects": UserModel.objects.filter(owned_projects__participants=request.user),
-            "interested-in-my-projects": UserModel.objects.filter(favorites__owner=request.user),
-            "participants-of-my-projects": UserModel.objects.filter(participating_projects__owner=request.user),
+            "owners-of-favorite-projects": UserModel.objects.filter(
+                owned_projects__in=request.user.favorites.all()
+            ),
+            "owners-of-participating-projects": UserModel.objects.filter(
+                owned_projects__participants=request.user
+            ),
+            "interested-in-my-projects": UserModel.objects.filter(
+                favorites__owner=request.user
+            ),
+            "participants-of-my-projects": UserModel.objects.filter(
+                participating_projects__owner=request.user
+            ),
         }
         users = filter_map.get(active_filter, users).order_by("-date_joined").distinct()
     paginator = Paginator(users, 12)
     page = request.GET.get("page")
     participants = paginator.get_page(page)
-    return render(request, "users/participants.html", {"participants": participants, "active_filter": active_filter})
+    return render(
+        request,
+        "users/participants.html",
+        {"participants": participants, "active_filter": active_filter},
+    )
 
 
 def user_details(request, user_id):
@@ -150,11 +177,15 @@ def logout_view(request):
 
 @login_required
 def edit_profile(request):
-    form = ProfileForm(request.POST or None, request.FILES or None, instance=request.user)
+    form = ProfileForm(
+        request.POST or None, request.FILES or None, instance=request.user
+    )
     if request.method == "POST" and form.is_valid():
         form.save()
         return redirect(f"/users/{request.user.id}")
-    return render(request, "users/edit_profile.html", {"form": form, "user": request.user})
+    return render(
+        request, "users/edit_profile.html", {"form": form, "user": request.user}
+    )
 
 
 @login_required
