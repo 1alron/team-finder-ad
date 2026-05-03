@@ -1,9 +1,19 @@
 import json
+
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import PasswordChangeForm
 from django.core.exceptions import ValidationError
+
 from .models import Project, User
+
+GITHUB_URL_PREFIX = "https://github.com/"
+
+
+def validate_github_url(url):
+    if url and not url.startswith(GITHUB_URL_PREFIX):
+        raise ValidationError(f"Ссылка должна вести на ресурс GitHub (начинается с {GITHUB_URL_PREFIX})")
+    return url
 
 
 class RegisterForm(forms.ModelForm):
@@ -49,8 +59,14 @@ class ProfileForm(forms.ModelForm):
         model = User
         fields = ["name", "surname", "avatar", "about", "phone", "github_url"]
 
+    def clean_github_url(self):
+        return validate_github_url(self.cleaned_data.get("github_url"))
+
 
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = ["name", "description", "github_url", "status"]
+
+    def clean_github_url(self):
+        return validate_github_url(self.cleaned_data.get("github_url"))
