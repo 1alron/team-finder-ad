@@ -1,35 +1,22 @@
 from django.conf import settings
-from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
-                                        PermissionsMixin)
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 
-
-class UserManager(BaseUserManager):
-    use_in_migrations = True
-
-    def create_user(self, email, password=None, **extra_fields):
-        if not email:
-            raise ValueError("Email is required")
-        email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)
-        user.save(using=self._db)
-        return user
-
-    def create_superuser(self, email, password=None, **extra_fields):
-        extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_superuser", True)
-        return self.create_user(email, password, **extra_fields)
+from .constants import (PROJECT_NAME_MAX_LENGTH, PROJECT_STATUS_MAX_LENGTH,
+                        USER_ABOUT_MAX_LENGTH, USER_NAME_MAX_LENGTH,
+                        USER_PHONE_MAX_LENGTH, USER_SURNAME_MAX_LENGTH)
+from .managers import UserManager
 
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True)
-    name = models.CharField(max_length=150)
-    surname = models.CharField(max_length=150)
+    name = models.CharField(max_length=USER_NAME_MAX_LENGTH)
+    surname = models.CharField(max_length=USER_SURNAME_MAX_LENGTH)
     avatar = models.ImageField(upload_to="avatars/", blank=True, null=True)
-    about = models.TextField(blank=True)
-    phone = models.CharField(max_length=30, blank=True)
+    about = models.TextField(blank=True, max_length=USER_ABOUT_MAX_LENGTH)
+    phone = models.CharField(max_length=USER_PHONE_MAX_LENGTH, blank=True)
     github_url = models.URLField(blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -60,15 +47,17 @@ class Project(models.Model):
         on_delete=models.CASCADE,
         related_name="owned_projects",
     )
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=PROJECT_NAME_MAX_LENGTH)
     description = models.TextField(blank=True)
     github_url = models.URLField(blank=True)
     status = models.CharField(
-        max_length=10, choices=STATUS_CHOICES, default=STATUS_OPEN
+        max_length=PROJECT_STATUS_MAX_LENGTH,
+        choices=STATUS_CHOICES,
+        default=STATUS_OPEN,
     )
     created_at = models.DateTimeField(auto_now_add=True)
     participants = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, blank=True, related_name="participating_projects"
+        settings.AUTH_USER_MODEL, blank=True, related_name="participated_projects"
     )
 
     class Meta:
@@ -76,3 +65,6 @@ class Project(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse("project_detail", kwargs={"project_id": self.pk})
