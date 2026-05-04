@@ -8,7 +8,7 @@ from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from main.constants import PROJECTS_PER_PAGE, USERS_PER_PAGE
+from main.constants import USERS_PER_PAGE
 from main.forms import LoginForm, ProfileForm, ProjectForm, RegisterForm
 from main.models import Project, User
 from main.service import get_project_queryset, paginate_queryset
@@ -20,7 +20,7 @@ def index(request):
 
 def project_list(request):
     projects = get_project_queryset().all()
-    projects_page = paginate_queryset(request, projects, PROJECTS_PER_PAGE)
+    projects_page = paginate_queryset(request, projects)
     return render(request, "projects/project_list.html", {"projects": projects_page})
 
 
@@ -28,7 +28,7 @@ def project_list(request):
 def favorite_projects(request):
     favorites = request.user.favorites.values_list("pk", flat=True)
     projects = get_project_queryset().filter(pk__in=favorites)
-    projects_page = paginate_queryset(request, projects, PROJECTS_PER_PAGE)
+    projects_page = paginate_queryset(request, projects)
     return render(
         request, "projects/favorite_projects.html", {"projects": projects_page}
     )
