@@ -6,14 +6,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.core.exceptions import ValidationError
 
 from .models import Project, User
-
-GITHUB_URL_PREFIX = "https://github.com/"
-
-
-def validate_github_url(url):
-    if url and not url.startswith(GITHUB_URL_PREFIX):
-        raise ValidationError(f"Ссылка должна вести на ресурс GitHub (начинается с {GITHUB_URL_PREFIX})")
-    return url
+from .validators import validate_github_url
 
 
 class RegisterForm(forms.ModelForm):
